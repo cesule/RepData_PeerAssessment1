@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 This assignment makes use of data from a personal activity monitoring device.
 This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during
@@ -17,9 +12,17 @@ taken in 5 minute intervals each day.
 Set working directory with setwd() same as the directory of the data and
 load the dataset into R.
 
-```{r}
+
+```r
 activity <- read.csv("activity.csv")
 str(activity)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
 2. Process/transform the data (if necessary) into a format suitable for your
@@ -27,9 +30,17 @@ analysis
 
 Convert date column (factor class) to date class.
 
-```{r}
+
+```r
 activity$date <- as.Date(activity$date)
 str(activity)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
 The variables included in this dataset are:
@@ -47,24 +58,46 @@ For this part of the assignment, the missing values in the dataset are ignored.
 
 Let's omit the missing values in the dataset and create/save a new dataset "daysteps" with total number of steps taken each day.
 
-```{r}
+
+```r
 library(plyr)
 daysteps <- ddply(na.omit(activity), .(date), summarize, totalsteps=sum(steps))
 str(daysteps)
 ```
 
+```
+## 'data.frame':	53 obs. of  2 variables:
+##  $ date      : Date, format: "2012-10-02" "2012-10-03" ...
+##  $ totalsteps: int  126 11352 12116 13294 15420 11015 12811 9900 10304 17382 ...
+```
+
 1. Make a histogram of the total number of steps taken each day
 
-```{r}
+
+```r
 hist(daysteps$totalsteps, main="Total Number of Steps Taken Each Day", col="lightblue", xlab=NULL)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
 2. Calculate and report the mean and median total number of steps taken
 per day
 
-```{r}
+
+```r
 mean(daysteps$totalsteps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(daysteps$totalsteps)
+```
+
+```
+## [1] 10765
 ```
 
 The mean is 10766.19 and the median is 10765.
@@ -73,28 +106,45 @@ The mean is 10766.19 and the median is 10765.
 
 Let's omit the missing values in the dataset and create a new dataset "intsteps" with average number of steps (averaged across all days) by 5-minute intervals.
 
-```{r}
+
+```r
 intsteps <- ddply(na.omit(activity), .(interval), summarize, msteps=mean(steps))
 ```
 
 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis)
 and the average number of steps taken, averaged across all days (y-axis)
 
-```{r}
+
+```r
 library(ggplot2)
 g <- ggplot(intsteps, aes(interval, msteps))
 g+geom_line(color="darkblue")+labs(x="5-minute interval identifier", y="", title="Average Number of Steps by 5-minute Intervals")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
 
 2. Which 5-minute interval, on average across all the days in the dataset,
 contains the maximum number of steps?
 
 Let's sort the data in descending order and check the first row.
 
-```{r}
+
+```r
 intsteps <- arrange(intsteps, desc(msteps))
 head(intsteps, 1)
+```
+
+```
+##   interval   msteps
+## 1      835 206.1698
+```
+
+```r
 intsteps[1,"interval"]
+```
+
+```
+## [1] 835
 ```
 
 The 5-minute interval with identifier "835" contains the maximum number of steps (which is 206.1698) on average across all the days.
@@ -108,9 +158,14 @@ calculations or summaries of the data.
 1. Calculate and report the total number of missing values in the dataset
 (i.e. the total number of rows with NAs)
 
-```{r}
+
+```r
 dataNA <- is.na(activity)
 sum(dataNA)
+```
+
+```
+## [1] 2304
 ```
 
 There are 2304 missing values in the dataset.
@@ -121,13 +176,15 @@ the mean/median for that day, or the mean for that 5-minute interval, etc.
 
 Let's merge the original dataset "activity" with dataset "intsteps" containing average number of steps by 5-minute intervals (averaged across all days).
 
-```{r}
+
+```r
 newdata <- merge(activity, intsteps, by.x="interval")
 ```
 
 Then, fill in the missing values using the the mean for corresponding 5-minute interval.
 
-```{r}
+
+```r
 i <- which(is.na(newdata$steps))
 j <- length(i)
 for (n in 1:j) {
@@ -140,24 +197,49 @@ missing data filled in.
 
 The new dataset "newdata" is created above in the second step.
 
-```{r}
+
+```r
 str(newdata)
+```
+
+```
+## 'data.frame':	17568 obs. of  4 variables:
+##  $ interval: int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ steps   : num  1.72 0 0 0 0 ...
+##  $ date    : Date, format: "2012-10-01" "2012-11-23" ...
+##  $ msteps  : num  1.72 1.72 1.72 1.72 1.72 ...
 ```
 
 4. Make a histogram of the total number of steps taken each day and Calculate
 and report the mean and median total number of steps taken per day. 
 
-```{r}
+
+```r
 newdaysteps <- ddply(newdata, .(date), summarize, totalsteps=sum(steps))
 ```
 
-```{r}
+
+```r
 hist(newdaysteps$totalsteps, main="Total Number of Steps Taken Each Day", col="coral", xlab=NULL)
 ```
 
-```{r}
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
+
+
+```r
 mean(newdaysteps$totalsteps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(newdaysteps$totalsteps)
+```
+
+```
+## [1] 10766.19
 ```
 
 Do these values differ from the estimates from the first part of the assignment?
@@ -176,7 +258,8 @@ Use the dataset with the filled-in missing values for this part.
 and "weekend" indicating whether a given date is a weekday or weekend
 day.
 
-```{r}
+
+```r
 newdata$weekday <- weekdays(newdata$date)
 newdata$type <- ifelse(newdata$weekday=="Saturday" | newdata$weekday=="Sunday", "Weekend", "Weekday")
 newdata$type <- factor(newdata$type)
@@ -186,12 +269,15 @@ newdata$type <- factor(newdata$type)
 5-minute interval (x-axis) and the average number of steps taken, averaged
 across all weekday days or weekend days (y-axis).
 
-```{r}
+
+```r
 typesteps <- ddply(newdata, ~interval + type, summarize, tmsteps=mean(steps))
 
 library(ggplot2)
 g <- ggplot(typesteps, aes(interval, tmsteps))
 g+geom_line(color="darkblue")+facet_grid(type~.)+labs(x="5-minute interval identifier", y="", title="Average Number of Steps by 5-minute Intervals")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-17-1.png) 
 
 
